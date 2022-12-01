@@ -1,26 +1,31 @@
 <template>
    <div>
-    <h1>BOOTFLIX</h1>
-    <div>
+    <h1>BOOLFLIX</h1>
+    <form @submit.prevent="$emit('search',searchString)">
       <label for="g">
          <input
          type="text"
          id="g"
          v-model="searchString"
          name="g"
-         placeholder="Cerca serie o film"
+         placeholder=" Cerca serie o film"
          >
       </label>
       <button>
          Cerca
       </button>
-    </div>
+    </form>
    </div>
 </template>
 
 <script>
 export default {
-
+  name: 'PageHeader',
+  data() {
+    return {
+      searchString: '',
+    };
+  },
 };
 </script>
 
@@ -35,14 +40,14 @@ export default {
         align-self: center;
         padding-left: 2em;
       }
-      div{
+      form{
         padding-right: 2em;
+        align-self: center;
         label{
           margin: auto;
           height: 2em;
         }
         button{
-          margin: auto;
           height: 1.9em;
           font-size: .9em;
           background-color: gray;

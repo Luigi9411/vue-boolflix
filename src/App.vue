@@ -1,6 +1,6 @@
 <template>
   <div>
-     <PageHeader @searchString="search" />
+     <PageHeader @search="search" />
      <PageMain :arr-films="arrFilms" :arr-series="arrSeries" />
   </div>
 </template>
@@ -26,11 +26,11 @@ export default {
     };
   },
   methods: {
-    search(searchString) {
+    search(search) {
       axios.get(`${this.urlApi}/search/movie`, {
         params: {
           api_key: this.keyApi,
-          query: searchString,
+          query: search,
           language: this.languageApi,
         },
       })
@@ -41,7 +41,7 @@ export default {
       axios.get(`${this.urlApi}/search/tv`, {
         params: {
           api_key: this.keyApi,
-          query: searchString,
+          query: search,
           language: this.languageApi,
         },
       })

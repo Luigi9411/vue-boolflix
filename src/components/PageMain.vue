@@ -1,48 +1,74 @@
 <template>
-  <div>
-     <h2 v-if="arrFilms.length">
-        Film
-     </h2>
-     <PageCard
-      v-for="objFilm in arrFilms"
-      :key="objFilm.id"
-      :title="objFilm.title"
-      :original-title="objFilm.original_title "
-      :language="objFilm.original_language"
-      :score="convertScore(objFilm.vote_average)"
-      :imgUrl="generateUrl(objFilm.poster_path)"
+  <main>
+    <div v-if="dataMovies && dataMovies.results.length">
+      <h2>
+        Movies
+      </h2>
+      <div class="grid">
+        <PageCard
+          v-for="objMovie in dataMovies.results"
+          :key="objMovie.id"
+          :title="objMovie.title"
+          :original-title="objMovie.original_title"
+          :language="objMovie.original_language"
+          :score="convertScore(objMovie.vote_average, originalMaxScore, newMaxScore)"
+          :img-url="generateUrl(objMovie.poster_path)"
+          :cast="objMovie.cast"
+          class="card"
+        />
+      </div>
+      <PaginatorComponent
+        :page="dataMovies.page"
+        :max-pages="dataMovies.total_pages"
+        @changePage="$emit('changePage', {page: $event, type: 'movie'})"
       />
-      <h2 v-if="arrSeries.length">
-        Serie tv
-    </h2>
-     <PageCard
-      v-for="objSeries in arrSeries"
-      :key="objSeries.id"
-      :title="objSeries.name"
-      :original-title="objSeries.original_name "
-      :language="objSeries.original_language"
-      :score="convertScore(objSeries.vote_average)"
-      :imgUrl="generateUrl(objSeries.poster_path)"
+    </div>
+
+    <div v-if="dataTv && dataTv.results.length">
+      <h2>
+        Serie TV
+      </h2>
+      <div class="grid">
+        <PageCard
+          v-for="objTv in dataTv.results"
+          :key="objTv.id"
+          :title="objTv.name"
+          :original-title="objTv.original_name"
+          :language="objTv.original_language"
+          :score="convertScore(objTv.vote_average, originalMaxScore, newMaxScore)"
+          :img-url="generateUrl(objTv.poster_path)"
+          class="card"
+        />
+      </div>
+      <PaginatorComponent
+        :page="dataTv.page"
+        :max-pages="dataTv.total_pages"
+        @changePage="$emit('changePage', {page: $event, type: 'tv'})"
       />
-  </div>
+    </div>
+  </main>
 </template>
 
 <script>
 import PageCard from '@/components/PageCard.vue';
+import PaginatorComponent from '@/components/PaginatorComponent.vue';
 
 export default {
-  name: 'PageMain',
+  name: 'MainPage',
   components: {
     PageCard,
+    PaginatorComponent,
   },
   props: {
-    arrFilms: Array,
-    arrSeries: Array,
+    dataMovies: Object,
+    dataTv: Object,
   },
   data() {
     return {
       baseImgUrl: 'https://image.tmdb.org/t/p/',
       imgSize: 'w342',
+      originalMaxScore: 10,
+      newMaxScore: 5,
     };
   },
   methods: {
@@ -52,12 +78,10 @@ export default {
       }
       return null;
     },
-    convertScore(score) {
-      const maxScore = 5;
-      const originalMaxScore = 10;
+    convertScore(score, originalMaxScore, newMaxScore) {
       return {
-        score: Math.ceil((score * maxScore) / originalMaxScore),
-        maxScore,
+        score: Math.ceil((score * newMaxScore) / originalMaxScore),
+        maxScore: newMaxScore,
       };
     },
   },
@@ -65,9 +89,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-   div{
-    min-height: 90vh;
-    background-color: lightgray;
-   }
-
+  main {
+    background-color: #525554;
+    h2{
+      color: red;
+      padding: .3em 1em;
+      font-size: 2em;
+    }
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .card {
+    flex: 0 0 33%;
+  }
+}
 </style>

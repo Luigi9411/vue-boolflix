@@ -1,21 +1,18 @@
 <template>
-   <div>
+  <header>
     <h1>BOOLFLIX</h1>
-    <form @submit.prevent="$emit('search',searchString)">
-      <label for="g">
-         <input
-         type="text"
-         id="g"
-         v-model="searchString"
-         name="g"
-         placeholder=" Cerca serie o film"
-         >
+    <form @submit.prevent="$emit('queryChange', queryString)">
+      <label for="query">
+        <input
+          id="query"
+          v-model="queryString"
+          type="text"
+          name="query"
+        >
       </label>
-      <button>
-         Cerca
-      </button>
+      <button>Cerca</button>
     </form>
-   </div>
+  </header>
 </template>
 
 <script>
@@ -23,14 +20,14 @@ export default {
   name: 'PageHeader',
   data() {
     return {
-      searchString: '',
+      queryString: '',
     };
   },
 };
 </script>
 
 <style lang="scss" scoped>
-    div{
+  header{
       display: flex;
       justify-content: space-between;
       height: 10vh;

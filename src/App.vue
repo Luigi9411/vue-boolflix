@@ -1,12 +1,17 @@
 <template>
   <div>
-     <PageHeader @search="search" />
-     <PageMain :arr-films="arrFilms" :arr-series="arrSeries" />
+    <PageHeader @queryChange="search" />
+    <PageMain
+      :data-movies="dataMovies"
+      :data-tv="dataTv"
+      @changePage="changePage"
+    />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import Vue from 'vue';
 import PageHeader from '@/components/PageHeader.vue';
 import PageMain from '@/components/PageMain.vue';
 
@@ -18,49 +23,89 @@ export default {
   },
   data() {
     return {
-      arrSeries: null,
-      arrFilms: null,
-      urlApi: 'https://api.themoviedb.org/3',
-      keyApi: '9776bd4da7d3b90c783bdbef13f8b137',
-      languageApi: 'it-IT',
+      baseApiUrl: 'https://api.themoviedb.org/3',
+      apiKey: '9776bd4da7d3b90c783bdbef13f8b137',
+      resultsLanguage: 'it-IT',
+      dataMovies: null,
+      dataTv: null,
+      queryString: '',
     };
   },
   methods: {
-    search(search) {
-      axios.get(`${this.urlApi}/search/movie`, {
+    search(queryString) {
+      this.queryString = queryString;
+      axios.get(`${this.baseApiUrl}/search/movie`, {
         params: {
-          api_key: this.keyApi,
-          query: search,
-          language: this.languageApi,
+          api_key: this.apiKey,
+          language: this.resultsLanguage,
+          query: queryString,
         },
       })
-        .then((axiosResponse) => {
-          console.log(axiosResponse);
-          this.arrFilms = axiosResponse.data.results;
+        .then((responseAxios) => {
+          this.dataMovies = responseAxios.data;
+          responseAxios.data.results.forEach((objMovie) => {
+            axios.get(`${this.baseApiUrl}/movie/${objMovie.id}/credits`, {
+              params: {
+                api_key: this.apiKey,
+              },
+            })
+              .then((axiosResponse) => {
+                const movie = objMovie;
+                Vue.set(movie, 'cast', axiosResponse.data.cast.slice(0, 5).map((objActor) => objActor.name));
+              });
+          });
         });
-      axios.get(`${this.urlApi}/search/tv`, {
+      axios.get(`${this.baseApiUrl}/search/tv`, {
         params: {
-          api_key: this.keyApi,
-          query: search,
-          language: this.languageApi,
+          api_key: this.apiKey,
+          language: this.resultsLanguage,
+          query: queryString,
         },
       })
-        .then((axiosResponse) => {
-          console.log(axiosResponse);
-          this.arrSeries = axiosResponse.data.results;
+        .then((responseAxios) => {
+          this.dataTv = responseAxios.data;
         });
     },
+    changePage(info) {
+      switch (info.type) {
+        case 'movie':
+          axios.get(`${this.baseApiUrl}/search/movie`, {
+            params: {
+              api_key: this.apiKey,
+              language: this.resultsLanguage,
+              query: this.queryString,
+              page: info.page,
+            },
+          })
+            .then((responseAxios) => {
+              this.dataMovies = responseAxios.data;
+            });
+          break;
+        case 'tv':
+          axios.get(`${this.baseApiUrl}/search/tv`, {
+            params: {
+              api_key: this.apiKey,
+              language: this.resultsLanguage,
+              query: this.queryString,
+              page: info.page,
+            },
+          })
+            .then((responseAxios) => {
+              this.dataTv = responseAxios.data;
+            });
+          break;
+        default:
+          break;
+      }
+    },
   },
-
 };
 </script>
 
 <style lang="scss">
-@import "../node_modules/bootstrap/scss/bootstrap";
-
-   * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 </style>
